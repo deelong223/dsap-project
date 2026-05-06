@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>終末地抽卡計算機 Endfield gacha calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            color: #f5f5f5;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f1f1f;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b3b3b;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: #121212;
+            border-radius: 1.5rem;
+            border: 1px solid #262626;
+            padding: 1.75rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #e5e5e5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a3a3a3;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #262626;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #f5f5f5;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .hint {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a3a3a3;
+        }
+
+        .banners-list {
+            margin-top: 1rem;
+        }
+        .banner-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .banner-label {
+            width: 5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a3a3a3;
+        }
+        .banner-item input {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #262626;
+            border-radius: 0.75rem;
+            padding: 0.7rem 1rem;
+            color: #f5f5f5;
+            font-size: 0.95rem;
+        }
+        .banner-item input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.875rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .calculate-btn:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .calculate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .result-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.08), rgba(168,85,247,0.05));
+            pointer-events: none;
+        }
+        .result-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #a3a3a3;
+            margin-bottom: 1rem;
+        }
+        .result-value {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        .result-sub {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a3a3a3;
+            margin-top: 0.75rem;
+        }
+        .placeholder-text {
+            color: #2c2c2c;
+            font-size: 1.125rem;
+        }
+
+        .divider {
+            border-top: 1px solid #262626;
+            margin: 1.5rem 0;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .threshold-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .threshold-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .threshold-hint {
+            font-size: 0.75rem;
+            color: #525252;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>終末地抽卡計算機</h1>
+            <h2>Arknights:Endfield gacha probability calculator</h2>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左側：輸入區 -->
+            <div class="card">
+                <div class="card-title">Current State (當前情況)</div>
+
+                <div class="form-group">
+                    <label>Initial Pity (墊幾抽) (0~79)</label>
+                    <input type="text" id="initialPity" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Budget (預算) (0~5000)</label>
+                    <input type="text" id="budget" value="0">
+                </div>
+
+                <div class="threshold-row">
+                    <div class="form-group">
+                        <label>Strategy (抽卡策略) (0~59)</label>
+                        <input type="text" id="threshold" value="47">
+                        <div class="threshold-hint">在哪抽後達成目標選擇繼續抽滿60抽 (預設:47)</div>
+                        <div class="threshold-hint">Continue pulling to 60 pulls after reaching the target within the threshold (default: 47)</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="card-title">Banner Targets (目標數量)</div>
+                <div class="hint" style="margin-bottom: 1rem;">valid number (輸入範圍): 0~6</div>
+
+                <div id="bannerContainer" class="banners-list"></div>
+
+                <button id="calculateBtn" class="calculate-btn">Calculate Probability (計算結果)</button>
+            </div>
+
+            <!-- 右側：結果區 -->
+            <div class="card result-card">
+                <div class="result-label">Success Probability (成功率)</div>
+                <div id="resultDisplay" class="placeholder-text" style="color: #525252;">點擊計算查看結果</div>
+                <div id="resultSub" class="result-sub" style="margin-top: 0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 固定 5 個卡池
+        const BANNER_COUNT = 5;
+        let banners = [0, 0, 0, 0, 0];
+
+        // 輸入範圍常量
+        const PITY_MIN = 0;
+        const PITY_MAX = 79;
+        const BUDGET_MIN = 0;
+        const BUDGET_MAX = 5000;
+        const TARGET_MIN = 0;
+        const TARGET_MAX = 6;
+        const THRESHOLD_MIN = 0;
+        const THRESHOLD_MAX = 59;
+        
+        // 預設值常量
+        const DEFAULT_PITY = 0;
+        const DEFAULT_BUDGET = 0;
+        const DEFAULT_THRESHOLD = 47;
+        const DEFAULT_TARGET = 0;
+
+        // WASM 函數
+        let calculateFunc = null;
+        let setThresholdFunc = null;
+
+        // DOM 元素
+        const bannerContainer = document.getElementById('bannerContainer');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const initialPityInput = document.getElementById('initialPity');
+        const budgetInput = document.getElementById('budget');
+        const thresholdInput = document.getElementById('threshold');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const resultSub = document.getElementById('resultSub');
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        // 通用獲取數字函數：空格返回 0
+        function getNumberWithDefault(input, min, max, defaultValue) {
+            let val = input.value.trim();
+            if (val === "") return 0;
+            let num = parseInt(val);
+            if (isNaN(num)) return 0;
+            return clamp(num, min, max);
+        }
+
+        // 設置輸入框值：如果值為 0 則清空，否則顯示數字
+        function setInputValue(input, value) {
+            if (value === 0) {
+                input.value = "";
+            } else {
+                input.value = value;
+            }
+        }
+
+        function handlePityInput() {
+            let val = getNumberWithDefault(initialPityInput, PITY_MIN, PITY_MAX, DEFAULT_PITY);
+            setInputValue(initialPityInput, val);
+        }
+
+        function handleBudgetInput() {
+            let val = getNumberWithDefault(budgetInput, BUDGET_MIN, BUDGET_MAX, DEFAULT_BUDGET);
+            setInputValue(budgetInput, val);
+        }
+
+        function handleThresholdInput() {
+            let val = getNumberWithDefault(thresholdInput, THRESHOLD_MIN, THRESHOLD_MAX, DEFAULT_THRESHOLD);
+            setInputValue(thresholdInput, val);
+            if (setThresholdFunc) {
+                setThresholdFunc(val);
+                console.log(`Threshold set to ${val}`);
+            }
+        }
+
+        function handleTargetInput(input, idx) {
+            let val = input.value.trim();
+            let num;
+            if (val === "") {
+                num = 0;
+            } else {
+                num = parseInt(val);
+                if (isNaN(num)) num = 0;
+                num = clamp(num, TARGET_MIN, TARGET_MAX);
+            }
+            setInputValue(input, num);
+            if (idx >= 0 && idx < banners.length) {
+                banners[idx] = num;
+            }
+        }
+
+        function renderBanners() {
+            bannerContainer.innerHTML = '';
+            for (let i = 0; i < BANNER_COUNT; i++) {
+                const target = banners[i] !== undefined ? banners[i] : 0;
+                const div = document.createElement('div');
+                div.className = 'banner-item';
+                div.innerHTML = `
+                    <span class="banner-label">Banner ${i + 1}</span>
+                    <input type="text" value="${target === 0 ? "" : target}" data-index="${i}" class="banner-input">
+                `;
+                bannerContainer.appendChild(div);
+            }
+
+            document.querySelectorAll('.banner-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const idx = parseInt(this.dataset.index);
+                    let val = this.value.trim();
+                    let num;
+                    if (val === "") {
+                        num = 0;
+                        this.value = "";
+                    } else {
+                        num = parseInt(val);
+                        if (isNaN(num)) {
+                            this.value = "";
+                            num = 0;
+                        } else {
+                            num = clamp(num, TARGET_MIN, TARGET_MAX);
+                            this.value = num === 0 ? "" : num;
+                        }
+                    }
+                    if (idx >= 0 && idx < banners.length) {
+                        banners[idx] = num;
+                    }
+                });
+                input.addEventListener('blur', function() {
+                    const idx = parseInt(this.dataset.index);
+                    handleTargetInput(this, idx);
+                });
+            });
+        }
+
+        function updateResult(prob) {
+            const percent = (Math.min(1, prob) * 100).toFixed(4);
+            resultDisplay.innerHTML = `<div class="result-value">${percent}%</div>`;
+            resultSub.innerHTML = `You have ${percent}% chance to get your target.`;
+        }
+
+        function showLoading() {
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = `計算中...`;
+            resultDisplay.innerHTML = '<div class="placeholder-text" style="color: #525252;">計算中...</div>';
+            resultSub.innerHTML = '';
+        }
+
+        function hideLoading() {
+            calculateBtn.disabled = false;
+            calculateBtn.innerHTML = `Calculate Probability (計算結果)`;
+        }
+
+        function showError(msg) {
+            resultDisplay.innerHTML = `<div class="placeholder-text" style="color: #ef4444;">${msg}</div>`;
+            resultSub.innerHTML = '';
+        }
+
+        function calculateMulti() {
+            if (!calculateFunc) {
+                showError('WASM 尚未加載完成，請稍後再試');
+                return;
+            }
+
+            const initialPity = getNumberWithDefault(initialPityInput, PITY_MIN, PITY_MAX, DEFAULT_PITY);
+            const initialBudget = getNumberWithDefault(budgetInput, BUDGET_MIN, BUDGET_MAX, DEFAULT_BUDGET);
+            const targets = banners.map(b => b);
+
+            showLoading();
+
+            setTimeout(() => {
+                try {
+                    const targetArray = new Int32Array(targets);
+                    const ptr = Module._malloc(targetArray.length * 4);
+
+                    for (let i = 0; i < targetArray.length; i++) {
+                        Module.setValue(ptr + i * 4, targetArray[i], 'i32');
+                    }
+
+                    const result = calculateFunc(ptr, targetArray.length, initialPity, initialBudget);
+                    Module._free(ptr);
+
+                    updateResult(result);
+                } catch (e) {
+                    console.error(e);
+                    showError('計算錯誤: ' + e.message);
+                } finally {
+                    hideLoading();
+                }
+            }, 50);
+        }
+
+        function initWasm() {
+            if (typeof Module !== 'undefined' && Module.cwrap) {
+                calculateFunc = Module.cwrap('calculate', 'number', ['number', 'number', 'number', 'number']);
+                setThresholdFunc = Module.cwrap('setThreshold', null, ['number']);
+
+                // 初始化閾值
+                let threshold = getNumberWithDefault(thresholdInput, THRESHOLD_MIN, THRESHOLD_MAX, DEFAULT_THRESHOLD);
+                setThresholdFunc(threshold);
+                console.log(`✅ WASM 加載成功，閾值設為 ${threshold}`);
+
+                calculateBtn.disabled = false;
+                resultDisplay.innerHTML = '<div class="placeholder-text" style="color: #525252;">點擊計算查看結果</div>';
+            } else {
+                setTimeout(initWasm, 100);
+            }
+        }
+
+        // 事件綁定
+        calculateBtn.addEventListener('click', calculateMulti);
+        initialPityInput.addEventListener('input', handlePityInput);
+        initialPityInput.addEventListener('blur', handlePityInput);
+        budgetInput.addEventListener('input', handleBudgetInput);
+        budgetInput.addEventListener('blur', handleBudgetInput);
+        thresholdInput.addEventListener('input', handleThresholdInput);
+        thresholdInput.addEventListener('blur', handleThresholdInput);
+
+        renderBanners();
+        calculateBtn.disabled = true;
+        setTimeout(initWasm, 500);
+    </script>
+    <script src="gacha.js"></script>
+</body>
+</html>
