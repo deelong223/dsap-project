@@ -116,14 +116,17 @@ C++，html
 1.編譯
 使用emscripten編譯器將cpp編譯成WASM檔與用來與WASM檔互動的javascript
 C:\emsdk\upstream\emscripten\emcc gacha.cpp -o gacha.js -s WASM=1 -s EXPORTED_FUNCTIONS=_calculate,_calculateSingle,_setThreshold,_malloc,_free -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,getValue,setValue -s ALLOW_MEMORY_GROWTH=1 -O3 --no-entry
+
 2.執行
 本地:使用python 3附帶的http服務器
 實際使用:將靜態網頁架設在vercel
+
 3.使用
 輸入必要的資訊，可自行調整參數。按照給定的規則計算機率
 
 ### 與課程的關聯總結
 1.動態規劃  
 將等價事件歸為同一類，縮小機率樹，大幅縮小複雜度。
+
 2.階層式樹狀結構
 使用階層式樹狀結構架構不規則陣列，將狀態空間盡量逼緊至理想最小上界。由於子節點照抽卡規則，大部分為1。因此在存取無排序資料時不會花太多時間。
