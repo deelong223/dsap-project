@@ -120,7 +120,7 @@ C:\emsdk\upstream\emscripten\emcc gacha.cpp -o gacha.js -s WASM=1 -s EXPORTED_FU
 2.執行  
 本地:使用python 3附帶的http服務器  
 python -m http.server xxxx  
-實際使用:將靜態網頁架設在vercel  
+實際使用:將靜態網頁架設在vercel，或使用github附帶的網頁架設服務  
 
 3.使用  
 輸入必要的資訊，可自行調整參數。按照給定的規則計算機率  
