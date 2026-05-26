@@ -118,7 +118,8 @@ C++，html
 C:\emsdk\upstream\emscripten\emcc gacha.cpp -o gacha.js -s WASM=1 -s EXPORTED_FUNCTIONS=_calculate,_calculateSingle,_setThreshold,_malloc,_free -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,getValue,setValue -s ALLOW_MEMORY_GROWTH=1 -O3 --no-entry
 
 2.執行  
-本地:使用python 3附帶的http服務器
+本地:使用python 3附帶的http服務器  
+python -m http.server xxxx  
 實際使用:將靜態網頁架設在vercel  
 
 3.使用  
